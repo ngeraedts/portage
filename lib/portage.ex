@@ -15,4 +15,8 @@ defmodule Portage do
   def hello do
     :world
   end
+
+  def run do
+    DynamicSupervisor.start_child(Portage.Supervisor, {Portage.Worker, []})
+  end
 end
