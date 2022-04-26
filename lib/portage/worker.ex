@@ -1,4 +1,7 @@
 defmodule Portage.Worker do
+  @moduledoc """
+  A GenServer worker to wrap a python application using Ports.
+  """
   use GenServer, restart: :temporary
 
   require Logger
