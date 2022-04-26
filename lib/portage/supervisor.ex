@@ -1,8 +1,13 @@
 defmodule Portage.Supervisor do
+  @moduledoc false
   use DynamicSupervisor
 
   def start_link(init_arg) do
     DynamicSupervisor.start_link(__MODULE__, init_arg, name: __MODULE__)
+  end
+
+  def start_worker() do
+    DynamicSupervisor.start_child(__MODULE__, {Portage.Worker, []})
   end
 
   @impl true

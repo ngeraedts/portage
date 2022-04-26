@@ -17,6 +17,6 @@ defmodule Portage do
   end
 
   def run do
-    DynamicSupervisor.start_child(Portage.Supervisor, {Portage.Worker, []})
+    Portage.Supervisor.start_worker()
   end
 end
