@@ -1,6 +1,4 @@
 defmodule Portage.Application do
-  # See https://hexdocs.pm/elixir/Application.html
-  # for more information on OTP Applications
   @moduledoc false
 
   use Application
@@ -8,13 +6,9 @@ defmodule Portage.Application do
   @impl true
   def start(_type, _args) do
     children = [
-      # Starts a worker by calling: Portage.Worker.start_link(arg)
       Portage.Supervisor
-      # {Portage.Worker, arg}
     ]
 
-    # See https://hexdocs.pm/elixir/Supervisor.html
-    # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Portage.Application]
     Supervisor.start_link(children, opts)
   end
