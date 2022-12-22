@@ -6,7 +6,7 @@ defmodule Portage.Application do
   @impl true
   def start(_type, _args) do
     children = [
-      Portage.Supervisor
+      Portage.WorkerSupervisor
     ]
 
     opts = [strategy: :one_for_one, name: Portage.Application]

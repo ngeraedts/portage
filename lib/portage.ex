@@ -4,19 +4,9 @@ defmodule Portage do
   """
 
   @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> Portage.hello()
-      :world
-
+  Run a python worker.
   """
-  def hello do
-    :world
-  end
-
-  def run do
-    Portage.Supervisor.start_worker()
+  def run(sleep_duration) do
+    Portage.WorkerSupervisor.start_worker(sleep_duration)
   end
 end

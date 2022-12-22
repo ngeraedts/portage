@@ -6,18 +6,25 @@ defmodule Portage.Worker do
 
   require Logger
 
-  def start_link(_args) do
-    GenServer.start_link(__MODULE__, [])
+  def start_link(args) do
+    GenServer.start_link(__MODULE__, args)
   end
 
-  def init(_args) do
-    {:ok, nil, {:continue, :startup}}
+  @impl GenServer
+  def init(args) do
+    state = %{sleep_duration: args[:sleep_duration], port: nil}
+    {:ok, state, {:continue, :startup}}
   end
 
-  def handle_continue(:startup, nil) do
+  @impl GenServer
+  def handle_continue(:startup, %{sleep_duration: sleep_duration} = state) do
     pythonpath = :code.priv_dir(:portage)
     cmd = "python -c \"from pyportage import hello; hello()\""
-    env = [{'PYTHONPATH', to_charlist(pythonpath)}]
+
+    env = [
+      {'PYTHONPATH', to_charlist(pythonpath)},
+      {'SLEEP_DURATION', to_charlist(sleep_duration)}
+    ]
 
     port =
       Port.open({:spawn, cmd}, [
@@ -28,21 +35,27 @@ defmodule Portage.Worker do
         :use_stdio
       ])
 
-    {:noreply, port}
+    {:noreply, %{state | port: port}}
+  rescue
+    _ ->
+      {:stop, :error, nil}
   end
 
-  def handle_info({port, {:exit_status, status}}, port) do
+  @impl GenServer
+  def handle_info(msg, state)
+
+  def handle_info({port, {:exit_status, status}}, %{port: port}) do
     Logger.info("port #{inspect(port)} closed with status #{inspect(status)}")
     {:stop, :normal, nil}
   end
 
-  def handle_info({port, {:data, {:eol, msg}}}, port) do
+  def handle_info({port, {:data, {:eol, msg}}}, %{port: port} = state) do
     Logger.info("got msg from python: #{inspect(msg)}")
-    {:noreply, port}
+    {:noreply, state}
   end
 
-  def handle_info(msg, port) do
+  def handle_info(msg, state) do
     Logger.info("got unexpected msg: #{inspect(msg)}")
-    {:noreply, port}
+    {:noreply, state}
   end
 end
